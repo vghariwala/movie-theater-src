@@ -1,75 +1,56 @@
 package com.jpmc.theater;
 
+import com.google.gson.annotations.Expose;
+import com.jpmc.theater.discount.Discount;
+import com.jpmc.theater.discount.EarlyBirdDiscount;
+import com.jpmc.theater.discount.SequenceDiscount;
+import com.jpmc.theater.discount.SpecialDiscount;
+import lombok.Data;
+import lombok.NonNull;
+
 import java.time.Duration;
-import java.util.Objects;
+import java.util.List;
 
-public class Movie {
-    private static int MOVIE_CODE_SPECIAL = 1;
+/**
+ * A movie class to represent the movie title, running time and ticket price
+ */
+@Data public class Movie {
 
-    private String title;
-    private String description;
-    private Duration runningTime;
-    private double ticketPrice;
-    private int specialCode;
+    /**
+     * A movie title
+     */
+    @NonNull @Expose private final String title;
 
-    public Movie(String title, Duration runningTime, double ticketPrice, int specialCode) {
-        this.title = title;
-        this.runningTime = runningTime;
-        this.ticketPrice = ticketPrice;
-        this.specialCode = specialCode;
-    }
+    /**
+     * A running time of the movie
+     */
+    @NonNull @Expose private final Duration runningTime;
 
-    public String getTitle() {
-        return title;
-    }
+    /**
+     * A ticket price of the movie
+     */
+    @NonNull @Expose private final double ticketPrice;
 
-    public Duration getRunningTime() {
-        return runningTime;
-    }
+    /**
+     * A code to identify movie as special
+     */
+    @NonNull private final int specialCode;
 
-    public double getTicketPrice() {
-        return ticketPrice;
-    }
+    /**
+     * A list of {@link Discount} instances to apply to the ticket price if available
+     */
+    private final List<Discount> discounts = List.of(new SpecialDiscount(), new SequenceDiscount(),
+		    new EarlyBirdDiscount());
 
+    /**
+     * Calculates the ticket price af the movie for a specified {@link Showing} after applying any available discounts
+     *
+     * @param showing an instance of {@link Showing} to consider applying any available discounts
+     * @return the ticket price af the movie for a specified {@link Showing} after applying any available discounts
+     */
     public double calculateTicketPrice(Showing showing) {
-        return ticketPrice - getDiscount(showing.getSequenceOfTheDay());
+	return ticketPrice - discounts.stream().map(discount -> discount.calculate(this, showing))
+			.mapToDouble(Double::doubleValue).max().orElse(0);
     }
 
-    private double getDiscount(int showSequence) {
-        double specialDiscount = 0;
-        if (MOVIE_CODE_SPECIAL == specialCode) {
-            specialDiscount = ticketPrice * 0.2;  // 20% discount for special movie
-        }
-
-        double sequenceDiscount = 0;
-        if (showSequence == 1) {
-            sequenceDiscount = 3; // $3 discount for 1st show
-        } else if (showSequence == 2) {
-
-            sequenceDiscount = 2; // $2 discount for 2nd show
-        }
-//        else {
-//            throw new IllegalArgumentException("failed exception");
-//        }
-
-        // biggest discount wins
-        return specialDiscount > sequenceDiscount ? specialDiscount : sequenceDiscount;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Movie movie = (Movie) o;
-        return Double.compare(movie.ticketPrice, ticketPrice) == 0
-                && Objects.equals(title, movie.title)
-                && Objects.equals(description, movie.description)
-                && Objects.equals(runningTime, movie.runningTime)
-                && Objects.equals(specialCode, movie.specialCode);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description, runningTime, ticketPrice, specialCode);
-    }
 }

@@ -1,39 +1,51 @@
 package com.jpmc.theater;
 
+import com.google.gson.annotations.Expose;
+import lombok.Data;
+import lombok.NonNull;
+
 import java.time.LocalDateTime;
 
-public class Showing {
-    private Movie movie;
-    private int sequenceOfTheDay;
-    private LocalDateTime showStartTime;
+/**
+ * A {@link Showing} representing the {@link Movie}, start time of showing and sequence of it in a day
+ */
+@Data public class Showing {
 
-    public Showing(Movie movie, int sequenceOfTheDay, LocalDateTime showStartTime) {
-        this.movie = movie;
-        this.sequenceOfTheDay = sequenceOfTheDay;
-        this.showStartTime = showStartTime;
+    /**
+     * A {@link Movie} in the {@link Showing}
+     */
+    @NonNull @Expose private final Movie movie;
+
+    /**
+     * A sequence of the {@link Showing}
+     */
+    @NonNull @Expose private final int sequenceOfTheDay;
+
+    /**
+     * A show start time
+     */
+    @NonNull @Expose private final LocalDateTime showStartTime;
+
+    @SuppressWarnings("unused") public boolean isSequence(int sequence) {
+	return this.sequenceOfTheDay == sequence;
     }
 
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public LocalDateTime getStartTime() {
-        return showStartTime;
-    }
-
-    public boolean isSequence(int sequence) {
-        return this.sequenceOfTheDay == sequence;
-    }
-
+    /**
+     * A {@link Movie} ticket price
+     *
+     * @return a {@link Movie} ticket price
+     */
     public double getMovieFee() {
-        return movie.getTicketPrice();
+	return movie.getTicketPrice();
     }
 
-    public int getSequenceOfTheDay() {
-        return sequenceOfTheDay;
-    }
-
-    private double calculateFee(int audienceCount) {
-        return movie.calculateTicketPrice(this) * audienceCount;
+    /**
+     * Calculates the total ticket price after applying any discounts for given number of audience count
+     *
+     * @param audienceCount a number of audience for calculating the ticket price
+     * @return the total ticket price after applying any discounts for given number of audience count
+     */
+    public double calculateFee(int audienceCount) {
+	return movie.calculateTicketPrice(this) * audienceCount;
     }
 }

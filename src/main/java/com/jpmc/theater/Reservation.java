@@ -1,17 +1,32 @@
 package com.jpmc.theater;
 
-public class Reservation {
-    private Customer customer;
-    private Showing showing;
-    private int audienceCount;
+import lombok.Data;
+import lombok.NonNull;
 
-    public Reservation(Customer customer, Showing showing, int audienceCount) {
-        this.customer = customer;
-        this.showing = showing;
-        this.audienceCount = audienceCount;
-    }
+/**
+ * A reservation class to make the movie reservation
+ */
+@Data public class Reservation {
 
+    /**
+     * A {@link Customer} making the reservation
+     */
+    @NonNull private Customer customer;
+
+    /**
+     * A reservation for the specific {@link Showing}
+     */
+    @NonNull private Showing showing;
+
+    /**
+     * Total number of tickets under this reservation
+     */
+    @NonNull private int audienceCount;
+
+    /**
+     * A total fee for this reservation
+     */
     public double totalFee() {
-        return showing.getMovieFee() * audienceCount;
+	return showing.calculateFee(audienceCount);
     }
 }
